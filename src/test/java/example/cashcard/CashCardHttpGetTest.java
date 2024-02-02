@@ -67,11 +67,13 @@ public class CashCardHttpGetTest {
 
     @Test
     void shouldReturnAPageOfCashCards() {
-        ResponseEntity<String> response = restTemplate.getForEntity("/cashcards?page=0&size=2", String.class);
+        ResponseEntity<String> response = restTemplate.getForEntity(
+            "/cashcards?page=0&size=1&sort=amount,desc", String.class
+        );
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         DocumentContext documentContext = JsonPath.parse(response.getBody());
         JSONArray page = documentContext.read("$[*]");
-        assertThat(page.size()).isEqualTo(2);
+        assertThat(page.size()).isEqualTo(1);
     }
 }
