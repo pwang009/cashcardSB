@@ -1,5 +1,7 @@
 package example.cashcard;
 
+import org.assertj.core.util.Arrays;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
@@ -15,6 +17,19 @@ class CashCardJsonTest {
     @Autowired
     private JacksonTester<CashCard> json;
 
+    @Autowired
+    private JacksonTester<CashCard[]> jsonList;
+
+    private CashCard[] cashCards;
+
+    @BeforeEach
+    void setUp() {
+        cashCards = Arrays.array(
+                new CashCard(99L, 123.45),
+                new CashCard(100L, 1.00),
+                new CashCard(101L, 150.00));
+    }
+
     @Test
     void cashCardSerializationTest() throws IOException {
         CashCard cashCard = new CashCard(99L, 123.45);
@@ -24,6 +39,11 @@ class CashCardJsonTest {
                 .isEqualTo(99);
         assertThat(json.write(cashCard)).hasJsonPathNumberValue("@.amount");
         assertThat(json.write(cashCard)).extractingJsonPathNumberValue("@.amount")
-             .isEqualTo(123.45);
+                .isEqualTo(123.45);
+    }
+
+    @Test
+    void cashCardListSerializationTest() throws IOException {
+        assertThat(jsonList.write(cashCards)).isStrictlyEqualToJson("list.json");
     }
 }

@@ -1,6 +1,7 @@
 package example.cashcard;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,6 +11,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 @RestController
 @RequestMapping("/cashcards")
@@ -19,6 +23,15 @@ class CashCardController {
 
     private CashCardController(CashCardRepository cashCardRepository) {
         this.cashCardRepository = cashCardRepository;
+    }
+
+    @GetMapping()
+    private ResponseEntity<List<CashCard>> findAll(Pageable pageable) {
+        Page<CashCard> page = cashCardRepository.findAll(
+                PageRequest.of(
+                        pageable.getPageNumber(),
+                        pageable.getPageSize()));
+        return ResponseEntity.ok(page.getContent());
     }
 
     @GetMapping("/{requestedId}")
@@ -32,12 +45,12 @@ class CashCardController {
     }
 
     @PostMapping
-    private ResponseEntity<Void> createCashCard(UriComponentsBuilder ucb, @RequestBody CashCard req ) {
+    private ResponseEntity<Void> createCashCard(UriComponentsBuilder ucb, @RequestBody CashCard req) {
         CashCard savedCashCard = cashCardRepository.save(req);
         URI location = ucb
-            .path("/cashcards/{id}")
-            .buildAndExpand(savedCashCard.id())
-            .toUri();
+                .path("/cashcards/{id}")
+                .buildAndExpand(savedCashCard.id())
+                .toUri();
         return ResponseEntity.created(location).build();
     }
 }
